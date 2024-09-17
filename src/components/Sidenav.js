@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const Sidenav = () => {
   const router = useRouter();
-  const [active, setActive] = useState("dashboard");
+  const pathname = usePathname(); // Get the current pathname
+
+  // Log the current pathname for debugging
+  console.log("Current Pathname:", pathname);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -21,34 +24,25 @@ const Sidenav = () => {
       <nav className="flex-grow mt-10">
         <ul>
           <li
-            onClick={() => {
-              setActive("dashboard");
-              router.push("/dashboard");
-            }}
+            onClick={() => router.push("/dashboard")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
-              active === "dashboard" ? "bg-gray-700" : ""
+              pathname === "/dashboard" ? "bg-gray-700" : ""
             }`}
           >
             Dashboard
           </li>
           <li
-            onClick={() => {
-              setActive("clubs");
-              router.push("/clubs");
-            }}
+            onClick={() => router.push("/clubs")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
-              active === "clubs" ? "bg-gray-700" : ""
+              pathname.startsWith("/clubs") ? "bg-gray-700" : ""
             }`}
           >
             Clubs
           </li>
           <li
-            onClick={() => {
-              setActive("settings");
-              router.push("/settings");
-            }}
+            onClick={() => router.push("/settings")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
-              active === "settings" ? "bg-gray-700" : ""
+              pathname === "/settings" ? "bg-gray-700" : ""
             }`}
           >
             Settings
