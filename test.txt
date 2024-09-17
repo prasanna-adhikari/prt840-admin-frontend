@@ -1,1 +1,0 @@
-Using React Admin to build Admin panel

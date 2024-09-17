@@ -1,0 +1,50 @@
+/* Import Tailwind's base, components, and utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define root-level custom properties for a minimalist light mode by default */
+:root {
+  --background: #fafafa; /* Very soft off-white background */
+  --foreground: #222222; /* Dark grey for text to reduce contrast from pure black */
+  --accent-color: #0070f3; /* Optional accent color for buttons/links (Next.js blue) */
+}
+
+/* Dark mode (optional, based on user's preference) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #e6e6e6; /* Dark grey for background */
+    --foreground: #393939; /* Light grey for text */
+    --accent-color: #0070f3; /* Keep accent color same or slightly muted for dark mode */
+  }
+}
+
+/* Apply custom background and text color to the body */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Minimalist link style */
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom 0.3s ease-in-out;
+}
+
+a:hover {
+  border-bottom: 1px solid var(--accent-color);
+}
+
+/* Custom Tailwind utility class for balanced text */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
