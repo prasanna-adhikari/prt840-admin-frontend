@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidenav from "../../components/Sidenav";
+import Loading from "../../components/Loading";
 
 const DashboardPage = () => {
   const [user, setUser] = useState(null);
@@ -35,7 +36,7 @@ const DashboardPage = () => {
   }, [router]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <Loading />;
   }
 
   return (
@@ -43,7 +44,7 @@ const DashboardPage = () => {
       {/* Sidenav component */}
       <Sidenav />
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-8 bg-gray-100 min-h-screen ml-64">
         <h1 className="text-4xl font-bold mb-6">Welcome to the Dashboard</h1>
         <p className="text-xl mb-4">Hello, {user.email}!</p>
         <p className="text-lg">Role: {user.role}</p>

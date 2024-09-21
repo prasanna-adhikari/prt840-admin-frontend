@@ -7,9 +7,6 @@ const Sidenav = () => {
   const router = useRouter();
   const pathname = usePathname(); // Get the current pathname
 
-  // Log the current pathname for debugging
-  console.log("Current Pathname:", pathname);
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -17,12 +14,13 @@ const Sidenav = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-800 text-white w-64 flex flex-col">
+    <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 text-white shadow-lg flex flex-col">
       <div className="flex items-center justify-center h-16 border-b border-gray-700">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
       </div>
       <nav className="flex-grow mt-10">
         <ul>
+          {/* Dashboard Link */}
           <li
             onClick={() => router.push("/dashboard")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
@@ -31,6 +29,7 @@ const Sidenav = () => {
           >
             Dashboard
           </li>
+          {/* Clubs Link */}
           <li
             onClick={() => router.push("/clubs")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
@@ -39,6 +38,16 @@ const Sidenav = () => {
           >
             Clubs
           </li>
+          {/* Users Link */}
+          <li
+            onClick={() => router.push("/users")}
+            className={`p-4 cursor-pointer hover:bg-gray-700 ${
+              pathname.startsWith("/users") ? "bg-gray-700" : ""
+            }`}
+          >
+            Users
+          </li>
+          {/* Settings Link */}
           <li
             onClick={() => router.push("/settings")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
@@ -52,7 +61,7 @@ const Sidenav = () => {
       <div className="border-t border-gray-700 p-4">
         <button
           onClick={handleLogout}
-          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded"
+          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded transition duration-300"
         >
           Logout
         </button>
