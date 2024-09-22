@@ -48,14 +48,14 @@ const Sidenav = () => {
             Users
           </li>
           {/* Settings Link */}
-          <li
+          {/* <li
             onClick={() => router.push("/settings")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
               pathname === "/settings" ? "bg-gray-700" : ""
             }`}
           >
             Settings
-          </li>
+          </li> */}
         </ul>
       </nav>
       <div className="border-t border-gray-700 p-4">

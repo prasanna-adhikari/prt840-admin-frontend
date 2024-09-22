@@ -8,18 +8,21 @@ import Sidenav from "../../../components/Sidenav"; // Add sidenav
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import ClubImageUpload from "../../../components/ClubImageUpload";
+import PostCard from "@/components/PostCard";
 
 const ClubDetail = () => {
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility for update
+  const [showAllFollowers, setShowAllFollowers] = useState(false); // Control visibility of followers
   const { id: clubId } = useParams(); // Destructure 'id' from useParams()
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (clubId) {
       const fetchClub = async () => {
+        console.log(token);
         try {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}clubs/${clubId}`,
@@ -27,7 +30,6 @@ const ClubDetail = () => {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${token}`,
-
                 "Content-Type": "application/json",
               },
             }
@@ -107,6 +109,10 @@ const ClubDetail = () => {
     return <p className="text-red-500">{error}</p>;
   }
 
+  const followersToShow = showAllFollowers
+    ? club.followers
+    : club.followers.slice(0, 3);
+
   return (
     <div className="flex">
       <Sidenav /> {/* Include Sidenav */}
@@ -135,6 +141,58 @@ const ClubDetail = () => {
             </div>
           )}
 
+          {/* Followers Section */}
+          <div className="mt-8 mb-2">
+            <h2 className="text-3xl font-semibold text-gray-800">Followers</h2>
+            <div
+              className={`flex flex-wrap gap-4 mt-4 transition-all duration-500 ${
+                showAllFollowers ? "max-h-full" : "max-h-[200px]"
+              } overflow-hidden`}
+            >
+              {followersToShow.map((follower) => (
+                <div
+                  key={follower.id}
+                  className="flex items-center space-x-4 bg-white p-4 rounded-lg "
+                  style={{ minWidth: "180px" }}
+                >
+                  <div className="w-12 h-12">
+                    {follower.profileImage ? (
+                      <img
+                        src={`http://localhost:7000/${follower.profileImage
+                          .replace("src\\", "")
+                          .replace(/\\/g, "/")}`}
+                        alt={follower.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-300 flex items-center justify-center rounded-full text-white text-lg font-semibold">
+                        {follower.name[0]}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      {follower.name}
+                    </p>
+                    <p className="text-gray-600 text-sm">{follower.email}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* CLub Followers show */}
+            {club.followers.length > 3 && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => setShowAllFollowers(!showAllFollowers)}
+                  className="bg-blue-300 hover:bg-blue-700 text-white py-2 px-4 rounded-md shadow-md transition duration-300"
+                >
+                  {showAllFollowers ? "Show Less" : "Show More"}
+                </button>
+              </div>
+            )}
+          </div>
+          {/* Posts and Events Section */}
+          <PostCard clubId={club._id} token={token} />
           {/* Modal for Updating Club */}
           <Modal
             isVisible={isModalVisible}

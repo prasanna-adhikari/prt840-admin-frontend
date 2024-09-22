@@ -16,7 +16,7 @@ const UsersPage = () => {
   const [page, setPage] = useState(0); // Page number for pagination (0-indexed for react-paginate)
   const [totalPages, setTotalPages] = useState(0); // Total number of pages for pagination
   const [totalUsers, setTotalUsers] = useState(0); // Total number of pages for pagination
-  const [limit] = useState(3); // Limit per page
+  const [limit] = useState(4); // Limit per page
   const [menuVisible, setMenuVisible] = useState(null); // Track the visible dropdown for each user
   const menuRef = useRef(null); // Ref to track the dropdown menu for clicks outside
   const router = useRouter(); // Correct usage of router in Next.js App Router
@@ -132,7 +132,7 @@ const UsersPage = () => {
 
   // Navigate to the profile view page
   const viewProfile = (userId) => {
-    router.push(`/user/profile/${userId}`);
+    router.push(`/users/${userId}`);
   };
 
   return (
@@ -198,9 +198,7 @@ const UsersPage = () => {
                         : "/default-avatar.png"
                     }
                     alt={user.name}
-                    width={96}
-                    height={96}
-                    className="object-cover"
+                    className="w-40 h-40 object-cover "
                   />
                 </div>
 
@@ -226,7 +224,7 @@ const UsersPage = () => {
 
                 {/* View Profile Button */}
                 <button
-                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-700"
                   onClick={() => viewProfile(user._id)}
                 >
                   View Profile
