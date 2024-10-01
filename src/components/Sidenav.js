@@ -2,10 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const Sidenav = () => {
   const router = useRouter();
   const pathname = usePathname(); // Get the current pathname
+  const [loading, setLoading] = useState(false); // Loading state for route changes
+
+  const handleNavigation = (route) => {
+    setLoading(true);
+    router.push(route);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -22,7 +29,7 @@ const Sidenav = () => {
         <ul>
           {/* Dashboard Link */}
           <li
-            onClick={() => router.push("/dashboard")}
+            onClick={() => handleNavigation("/dashboard")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
               pathname === "/dashboard" ? "bg-gray-700" : ""
             }`}
@@ -31,7 +38,7 @@ const Sidenav = () => {
           </li>
           {/* Clubs Link */}
           <li
-            onClick={() => router.push("/clubs")}
+            onClick={() => handleNavigation("/clubs")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
               pathname.startsWith("/clubs") ? "bg-gray-700" : ""
             }`}
@@ -40,7 +47,7 @@ const Sidenav = () => {
           </li>
           {/* Users Link */}
           <li
-            onClick={() => router.push("/users")}
+            onClick={() => handleNavigation("/users")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
               pathname.startsWith("/users") ? "bg-gray-700" : ""
             }`}
@@ -49,7 +56,7 @@ const Sidenav = () => {
           </li>
           {/* Settings Link */}
           {/* <li
-            onClick={() => router.push("/settings")}
+            onClick={() => handleNavigation("/settings")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
               pathname === "/settings" ? "bg-gray-700" : ""
             }`}
@@ -66,6 +73,12 @@ const Sidenav = () => {
           Logout
         </button>
       </div>
+      {/* Loading Indicator */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="text-white text-xl font-semibold">Loading...</div>
+        </div>
+      )}
     </div>
   );
 };

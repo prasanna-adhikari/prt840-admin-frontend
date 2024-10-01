@@ -14,6 +14,8 @@ import * as Yup from "yup"; // For validation
 const ClubsPage = () => {
   const [clubs, setClubs] = useState([]);
   const [loadingClubs, setLoadingClubs] = useState(true); // Specific loading state for clubs
+  const [loadingSubmit, setLoadingSubmit] = useState(false); // Loading state for adding a club
+  const [loadingDelete, setLoadingDelete] = useState(false); // Loading state for deleting a club
   const [error, setError] = useState(null); // Error state for displaying in modal
   const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility for adding club
   const [isWarningModalVisible, setIsWarningModalVisible] = useState(false); // Control warning modal visibility
@@ -112,6 +114,7 @@ const ClubsPage = () => {
     values,
     { setSubmitting, setErrors, resetForm }
   ) => {
+    setLoadingSubmit(true); // Set loading state for submission
     const formData = new FormData();
 
     // Append form fields to FormData
@@ -153,6 +156,7 @@ const ClubsPage = () => {
       setError("An error occurred while creating the club."); // General error
       console.error(err.message);
     } finally {
+      setLoadingSubmit(false); // Set loading state to false
       setSubmitting(false);
     }
   };
@@ -160,9 +164,8 @@ const ClubsPage = () => {
   // Function to handle confirming the deletion of a club
   const handleConfirmDeleteClub = () => {
     if (clubToDelete) {
+      setLoadingDelete(true); // Set loading state for delete
       handleDeleteClub(clubToDelete);
-      setIsWarningModalVisible(false);
-      setClubToDelete(null);
     }
   };
 
@@ -203,6 +206,10 @@ const ClubsPage = () => {
     } catch (err) {
       console.error("Error deleting club:", err.message);
       setError("Failed to delete the club");
+    } finally {
+      setLoadingDelete(false); // Set loading state to false after delete
+      setIsWarningModalVisible(false);
+      setClubToDelete(null);
     }
   };
 
@@ -314,6 +321,8 @@ const ClubsPage = () => {
               >
                 {({ setFieldValue, isSubmitting, errors }) => (
                   <Form>
+                    {loadingSubmit && <Loading />}{" "}
+                    {/* Show loading during submission */}
                     <div className="mb-4">
                       <label
                         htmlFor="name"
@@ -332,7 +341,6 @@ const ClubsPage = () => {
                         className="text-red-500 text-sm mt-1"
                       />
                     </div>
-
                     <div className="mb-4">
                       <label
                         htmlFor="description"
@@ -351,7 +359,6 @@ const ClubsPage = () => {
                         className="text-red-500 text-sm mt-1"
                       />
                     </div>
-
                     <div className="mb-4">
                       <label
                         htmlFor="clubImage"
@@ -367,12 +374,10 @@ const ClubsPage = () => {
                         className="text-red-500 text-sm mt-1"
                       />
                     </div>
-
                     {/* Show general error inside the form, if any */}
                     {error && (
                       <div className="text-red-500 text-sm mb-4">{error}</div>
                     )}
-
                     <button
                       type="submit"
                       disabled={isSubmitting}
@@ -390,7 +395,9 @@ const ClubsPage = () => {
               isVisible={isWarningModalVisible}
               onClose={() => setIsWarningModalVisible(false)}
               onConfirm={handleConfirmDeleteClub}
-            />
+            >
+              {loadingDelete && <Loading />} {/* Show loading during delete */}
+            </WarningModal>
           </>
         )}
       </div>

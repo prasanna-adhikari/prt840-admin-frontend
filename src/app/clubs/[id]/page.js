@@ -13,6 +13,7 @@ import PostCard from "@/components/PostCard";
 const ClubDetail = () => {
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingUpdate, setLoadingUpdate] = useState(false); // Loading state for updating club
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility for update
   const [showAllFollowers, setShowAllFollowers] = useState(false); // Control visibility of followers
@@ -21,6 +22,7 @@ const ClubDetail = () => {
 
   // Reusable function to fetch club details
   const fetchClub = async () => {
+    setLoading(true); // Set loading state when fetching club
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}clubs/${clubId}`,
@@ -65,7 +67,7 @@ const ClubDetail = () => {
 
   // Handle form submission for updating club details
   const handleUpdate = async (values, { setSubmitting, resetForm }) => {
-    const token = localStorage.getItem("token");
+    setLoadingUpdate(true); // Set loading state when updating
     const formData = new FormData();
 
     // Append form fields to FormData
@@ -96,13 +98,14 @@ const ClubDetail = () => {
       resetForm();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoadingUpdate(false); // Set loading state to false after update
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
   };
 
   if (loading) {
-    return <Loading />; // Use the Loading component
+    return <Loading />; // Use the Loading component when fetching data
   }
 
   if (error) {
@@ -210,6 +213,8 @@ const ClubDetail = () => {
             >
               {({ setFieldValue, isSubmitting, values }) => (
                 <Form>
+                  {loadingUpdate && <Loading />}{" "}
+                  {/* Show loading during update */}
                   <div className="mb-4">
                     <label
                       htmlFor="name"
@@ -228,7 +233,6 @@ const ClubDetail = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
-
                   <div className="mb-4">
                     <label
                       htmlFor="description"
@@ -247,7 +251,6 @@ const ClubDetail = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
-
                   {/* Current Club Image Preview */}
                   {club.clubImage && (
                     <div className="mb-4">
@@ -263,7 +266,6 @@ const ClubDetail = () => {
                       />
                     </div>
                   )}
-
                   <div className="mb-4">
                     <label
                       htmlFor="clubImage"
@@ -278,12 +280,10 @@ const ClubDetail = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
-
                   {/* Show general error inside the form */}
                   {error && (
                     <div className="text-red-500 text-sm mb-4">{error}</div>
                   )}
-
                   <button
                     type="submit"
                     disabled={isSubmitting}

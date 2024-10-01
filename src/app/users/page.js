@@ -10,7 +10,7 @@ import axios from "axios";
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]); // User data
-  const [loading, setLoading] = useState(false); // For showing the loader
+  const [loading, setLoading] = useState(false); // For showing the loader while fetching data
   const [error, setError] = useState(null); // Error state for displaying errors
   const [searchQuery, setSearchQuery] = useState(""); // Search query state
   const [page, setPage] = useState(0); // Page number for pagination (0-indexed for react-paginate)
@@ -18,6 +18,7 @@ const UsersPage = () => {
   const [totalUsers, setTotalUsers] = useState(0); // Total number of pages for pagination
   const [limit] = useState(4); // Limit per page
   const [menuVisible, setMenuVisible] = useState(null); // Track the visible dropdown for each user
+  const [loadingAction, setLoadingAction] = useState(null); // Track loading state for user actions
   const menuRef = useRef(null); // Ref to track the dropdown menu for clicks outside
   const router = useRouter(); // Correct usage of router in Next.js App Router
 
@@ -90,6 +91,7 @@ const UsersPage = () => {
 
   // Handle deleting a user
   const handleDeleteUser = async (userId) => {
+    setLoadingAction(userId); // Show loading for this specific user action
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${userId}`,
@@ -102,11 +104,14 @@ const UsersPage = () => {
       setUsers(users.filter((user) => user._id !== userId)); // Remove user from list
     } catch (err) {
       setError("Failed to delete user");
+    } finally {
+      setLoadingAction(null); // Stop loading after action
     }
   };
 
   // Toggle verified status of a user
   const toggleVerifiedStatus = async (userId, currentStatus) => {
+    setLoadingAction(userId); // Show loading for this specific user action
     try {
       // Optimistic UI update
       setUsers((prevUsers) =>
@@ -127,6 +132,8 @@ const UsersPage = () => {
       );
     } catch (err) {
       setError("Failed to update verification status");
+    } finally {
+      setLoadingAction(null); // Stop loading after action
     }
   };
 
@@ -158,6 +165,9 @@ const UsersPage = () => {
                 key={user._id}
                 className="bg-white p-4 shadow rounded-lg flex flex-col items-center relative"
               >
+                {/* Loading indicator for action */}
+                {loadingAction === user._id && <Loading />}
+
                 {/* Three dots menu */}
                 <div className="absolute top-2 right-2">
                   <BsThreeDotsVertical
@@ -204,7 +214,7 @@ const UsersPage = () => {
 
                 {/* User Name */}
                 <h2 className="text-lg font-semibold">{user.name}</h2>
-
+                <p className="text-gray-600 flex items-center">{user.email}</p>
                 {/* Role and Badge */}
                 <p className="text-gray-600 flex items-center">
                   {user.role}

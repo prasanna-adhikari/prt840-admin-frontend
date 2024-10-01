@@ -44,6 +44,7 @@ const UserProfilePage = ({ params }) => {
     fetchUserProfile();
   }, [userId]);
 
+  // Loading state before rendering the page
   if (loading) return <Loading />;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
@@ -105,14 +106,14 @@ const UserProfilePage = ({ params }) => {
                 <FaUserFriends className="text-2xl text-blue-500 mr-3" />
                 <h3 className="text-xl font-semibold">Friends</h3>
               </div>
-              <Swiper
-                spaceBetween={16}
-                slidesPerView={3}
-                navigation
-                modules={[Navigation]}
-              >
-                {user?.friends?.length > 0 ? (
-                  user.friends.map((friend) => (
+              {user?.friends?.length > 0 ? (
+                <Swiper
+                  spaceBetween={16}
+                  slidesPerView={3}
+                  navigation
+                  modules={[Navigation]}
+                >
+                  {user.friends.map((friend) => (
                     <SwiperSlide key={friend._id}>
                       <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-md">
                         <img
@@ -130,11 +131,11 @@ const UserProfilePage = ({ params }) => {
                         </p>
                       </div>
                     </SwiperSlide>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No friends to show</p>
-                )}
-              </Swiper>
+                  ))}
+                </Swiper>
+              ) : (
+                <p className="text-gray-500">No friends to show</p>
+              )}
             </div>
 
             {/* Following Clubs Section Carousel */}
@@ -143,14 +144,14 @@ const UserProfilePage = ({ params }) => {
                 <FaUsers className="text-2xl text-green-500 mr-3" />
                 <h3 className="text-xl font-semibold">Following Clubs</h3>
               </div>
-              <Swiper
-                spaceBetween={16}
-                slidesPerView={3}
-                navigation
-                modules={[Navigation]}
-              >
-                {user?.followingClubs?.length > 0 ? (
-                  user.followingClubs.map((club) => (
+              {user?.followingClubs?.length > 0 ? (
+                <Swiper
+                  spaceBetween={16}
+                  slidesPerView={3}
+                  navigation
+                  modules={[Navigation]}
+                >
+                  {user.followingClubs.map((club) => (
                     <SwiperSlide key={club._id}>
                       <div className="flex flex-col items-center bg-gray-50 p-6 rounded-lg shadow-md">
                         <img
@@ -168,11 +169,11 @@ const UserProfilePage = ({ params }) => {
                         </p>
                       </div>
                     </SwiperSlide>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No clubs followed</p>
-                )}
-              </Swiper>
+                  ))}
+                </Swiper>
+              ) : (
+                <p className="text-gray-500">No clubs followed</p>
+              )}
             </div>
           </div>
         </div>
