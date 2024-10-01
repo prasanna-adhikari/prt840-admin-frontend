@@ -7,7 +7,6 @@ const Pagination = ({
   marginPagesDisplayed = 2,
   pageRangeDisplayed = 3,
 }) => {
-  console.log(pageCount);
   return (
     <ReactPaginate
       previousLabel={"← Previous"}
@@ -20,7 +19,7 @@ const Pagination = ({
       containerClassName={"pagination flex"}
       pageClassName={"page-item mx-1"}
       pageLinkClassName={
-        "page-link px-3 py-2 rounded-md bg-white text-gray-700 hover:bg-blue-500 hover:text-white"
+        "page-link px-3 py-2 rounded-md bg-white text-gray-700 hover:bg-blue-500 hover:text-white" // Default (inactive) class
       }
       previousClassName={currentPage === 0 ? "hidden" : "page-item mx-1"}
       previousLinkClassName={
@@ -34,8 +33,10 @@ const Pagination = ({
       breakLinkClassName={
         "page-link px-3 py-2 rounded-md bg-white text-gray-700"
       }
-      activeClassName={"active"}
-      activeLinkClassName={"bg-blue-700 text-white px-3 py-2 rounded-md"}
+      activeClassName={"active"} // Active class for the current page item
+      activeLinkClassName={
+        "page-link px-3 py-2 rounded-md bg-blue-700 text-white" // Active link style
+      }
       forcePage={currentPage}
     />
   );

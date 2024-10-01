@@ -19,36 +19,36 @@ const ClubDetail = () => {
   const { id: clubId } = useParams(); // Destructure 'id' from useParams()
   const token = localStorage.getItem("token");
 
+  // Reusable function to fetch club details
+  const fetchClub = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}clubs/${clubId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch club details");
+      }
+
+      const data = await response.json();
+      setClub(data.result);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (clubId) {
-      const fetchClub = async () => {
-        console.log(token);
-        try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}clubs/${clubId}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch club details");
-          }
-
-          const data = await response.json();
-          setClub(data.result);
-          setLoading(false);
-        } catch (err) {
-          console.error(err);
-          setError(err.message);
-          setLoading(false);
-        }
-      };
-
       fetchClub();
     }
   }, [clubId]);
@@ -90,9 +90,9 @@ const ClubDetail = () => {
         throw new Error(errorData.message || "Failed to update the club");
       }
 
-      const updatedClub = await response.json();
-      setClub(updatedClub.result); // Update the state with the new club details
+      await response.json();
       setIsModalVisible(false); // Close the modal
+      fetchClub(); // Refetch the club data to reflect the changes
       resetForm();
     } catch (err) {
       setError(err.message);
@@ -110,8 +110,8 @@ const ClubDetail = () => {
   }
 
   const followersToShow = showAllFollowers
-    ? club.followers
-    : club.followers.slice(0, 3);
+    ? club?.followers
+    : club?.followers?.slice(0, 3);
 
   return (
     <div className="flex">
@@ -149,7 +149,7 @@ const ClubDetail = () => {
                 showAllFollowers ? "max-h-full" : "max-h-[200px]"
               } overflow-hidden`}
             >
-              {followersToShow.map((follower) => (
+              {followersToShow?.map((follower) => (
                 <div
                   key={follower.id}
                   className="flex items-center space-x-4 bg-white p-4 rounded-lg "
@@ -179,8 +179,8 @@ const ClubDetail = () => {
                 </div>
               ))}
             </div>
-            {/* CLub Followers show */}
-            {club.followers.length > 3 && (
+            {/* Show more or less followers button */}
+            {club?.followers?.length > 3 && (
               <div className="flex justify-center mt-4">
                 <button
                   onClick={() => setShowAllFollowers(!showAllFollowers)}
@@ -199,7 +199,6 @@ const ClubDetail = () => {
             onClose={() => setIsModalVisible(false)}
             title={`Update Club`}
           >
-            {/* Change modal title */}
             <Formik
               initialValues={{
                 name: club.name || "",

@@ -7,6 +7,7 @@ import Loading from "../../components/Loading";
 import Modal from "../../components/Modal";
 import ClubImageUpload from "../../components/ClubImageUpload"; // Import the Dropzone component
 import Pagination from "../../components/Pagination"; // Import the reusable Pagination component
+import WarningModal from "../../components/WarningModal"; // Import the WarningModal component
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup"; // For validation
 
@@ -14,7 +15,9 @@ const ClubsPage = () => {
   const [clubs, setClubs] = useState([]);
   const [loadingClubs, setLoadingClubs] = useState(true); // Specific loading state for clubs
   const [error, setError] = useState(null); // Error state for displaying in modal
-  const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility
+  const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility for adding club
+  const [isWarningModalVisible, setIsWarningModalVisible] = useState(false); // Control warning modal visibility
+  const [clubToDelete, setClubToDelete] = useState(null); // Track the club to be deleted
   const [searchQuery, setSearchQuery] = useState(""); // Search query state
   const [page, setPage] = useState(0); // Page number for pagination (0-indexed for react-paginate)
   const [totalClubs, setTotalClubs] = useState(0); // Total number of clubs
@@ -141,9 +144,9 @@ const ClubsPage = () => {
         return; // Stop further execution after error is set
       }
 
-      const addedClub = await response.json();
-
-      setClubs([...clubs, addedClub.result]); // Update the state with the new club
+      // Reset to the first page and fetch the updated list of clubs
+      setPage(0);
+      fetchClubs(); // Fetch the updated list of clubs
       setIsModalVisible(false); // Close the modal
       resetForm(); // Reset the form after submission
     } catch (err) {
@@ -151,6 +154,15 @@ const ClubsPage = () => {
       console.error(err.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Function to handle confirming the deletion of a club
+  const handleConfirmDeleteClub = () => {
+    if (clubToDelete) {
+      handleDeleteClub(clubToDelete);
+      setIsWarningModalVisible(false);
+      setClubToDelete(null);
     }
   };
 
@@ -172,9 +184,22 @@ const ClubsPage = () => {
         throw new Error("Failed to delete club");
       }
 
-      // Remove the deleted club from the local state
-      const remainingClubs = await response.json();
-      setClubs(remainingClubs.result.remainingClubs); // Update the club list
+      // Update total clubs and fetch updated data
+      const updatedTotalClubs = totalClubs - 1;
+
+      // Check if the current page is empty after deleting the item
+      const isPageEmptyAfterDelete = clubs.length === 1 && page > 0;
+
+      // If the current page becomes empty, move to the previous page
+      if (isPageEmptyAfterDelete) {
+        setPage((prevPage) => prevPage - 1);
+      } else {
+        // Refetch the data on the current page
+        fetchClubs();
+      }
+
+      // Update total clubs
+      setTotalClubs(updatedTotalClubs);
     } catch (err) {
       console.error("Error deleting club:", err.message);
       setError("Failed to delete the club");
@@ -249,13 +274,8 @@ const ClubsPage = () => {
                         </button>
                         <button
                           onClick={() => {
-                            if (
-                              confirm(
-                                "Are you sure you want to delete this club?"
-                              )
-                            ) {
-                              handleDeleteClub(club._id); // Call delete function
-                            }
+                            setClubToDelete(club._id);
+                            setIsWarningModalVisible(true);
                           }}
                           className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded transition duration-300 ease-in-out"
                         >
@@ -364,6 +384,13 @@ const ClubsPage = () => {
                 )}
               </Formik>
             </Modal>
+
+            {/* Warning Modal for Deleting Club */}
+            <WarningModal
+              isVisible={isWarningModalVisible}
+              onClose={() => setIsWarningModalVisible(false)}
+              onConfirm={handleConfirmDeleteClub}
+            />
           </>
         )}
       </div>
