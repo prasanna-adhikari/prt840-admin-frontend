@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import Modal from "../../../components/Modal";
 import Loading from "../../../components/Loading"; // Add loading spinner
 import Sidenav from "../../../components/Sidenav"; // Add sidenav
+import CreatePostOrEventModal from "../../../components/CreatePostOrEventModal"; // Import the new component
+import PostCard from "@/components/PostCard";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import ClubImageUpload from "../../../components/ClubImageUpload";
-import PostCard from "@/components/PostCard";
+import { FiPlus } from "react-icons/fi";
 
 const ClubDetail = () => {
   const [club, setClub] = useState(null);
@@ -17,11 +19,26 @@ const ClubDetail = () => {
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility for update
   const [showAllFollowers, setShowAllFollowers] = useState(false); // Control visibility of followers
+  const [isCreatePostModalVisible, setIsCreatePostModalVisible] =
+    useState(false); // Control modal visibility for creating posts
+  const [isCreateEventModalVisible, setIsCreateEventModalVisible] =
+    useState(false); // Control modal visibility for creating events
   const { id: clubId } = useParams(); // Destructure 'id' from useParams()
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(null); // State to hold the token
+
+  // Fetch the token from localStorage after the component has mounted
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Check if we are in the browser environment
+      const storedToken = localStorage.getItem("token");
+      setToken(storedToken);
+    }
+  }, []);
 
   // Reusable function to fetch club details
   const fetchClub = async () => {
+    if (!token) return;
+
     setLoading(true); // Set loading state when fetching club
     try {
       const response = await fetch(
@@ -50,58 +67,14 @@ const ClubDetail = () => {
   };
 
   useEffect(() => {
-    if (clubId) {
+    if (clubId && token) {
       fetchClub();
     }
-  }, [clubId]);
+  }, [clubId, token]);
 
-  // Validation schema for the update form using Yup
-  const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .required("Club name is required")
-      .min(3, "Name must be at least 3 characters"),
-    description: Yup.string()
-      .required("Description is required")
-      .min(10, "Description must be at least 10 characters"),
-  });
-
-  // Handle form submission for updating club details
-  const handleUpdate = async (values, { setSubmitting, resetForm }) => {
-    setLoadingUpdate(true); // Set loading state when updating
-    const formData = new FormData();
-
-    // Append form fields to FormData
-    formData.append("name", values.name);
-    formData.append("description", values.description);
-    formData.append("clubImage", values.clubImage); // Append the file
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}update-club/${clubId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update the club");
-      }
-
-      await response.json();
-      setIsModalVisible(false); // Close the modal
-      fetchClub(); // Refetch the club data to reflect the changes
-      resetForm();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoadingUpdate(false); // Set loading state to false after update
-      setSubmitting(false);
-    }
+  // Callback function to refresh club data after a new post or event is created
+  const refreshClubData = () => {
+    fetchClub();
   };
 
   if (loading) {
@@ -121,9 +94,9 @@ const ClubDetail = () => {
       <Sidenav /> {/* Include Sidenav */}
       <div className="flex-1 p-8 bg-gray-100 min-h-screen ml-64">
         <div className="max-w-4xl mx-auto">
+          {/* Club Header Section */}
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-5xl font-bold text-gray-800">{club.name}</h1>
-            {/* Update Button next to the title */}
             <button
               onClick={() => setIsModalVisible(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md shadow-md transition duration-300"
@@ -194,8 +167,59 @@ const ClubDetail = () => {
               </div>
             )}
           </div>
-          {/* Posts and Events Section */}
+          <h2 className="text-3xl font-semibold text-gray-800 mt-10">
+            Posts & Events
+          </h2>
+          <div className="flex space-x-4 mt-5">
+            <button
+              className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100 transition duration-300"
+              onClick={() => setIsCreatePostModalVisible(true)}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                  <FiPlus className="w-8 h-8" />
+                </div>
+                <p className="text-xl text-gray-800 font-semibold">
+                  Create a New Post
+                </p>
+              </div>
+            </button>
+            <button
+              className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100 transition duration-300"
+              onClick={() => setIsCreateEventModalVisible(true)}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white">
+                  <FiPlus className="w-8 h-8" />
+                </div>
+                <p className="text-xl text-gray-800 font-semibold">
+                  Create a New Event
+                </p>
+              </div>
+            </button>
+          </div>
+
+          {/* Posts Section */}
           <PostCard clubId={club._id} token={token} />
+
+          {/* Modal for Creating Post */}
+          <CreatePostOrEventModal
+            isVisible={isCreatePostModalVisible}
+            onClose={() => setIsCreatePostModalVisible(false)}
+            clubId={clubId}
+            type="post"
+            onSuccess={refreshClubData} // Refresh club data on success
+          />
+
+          {/* Modal for Creating Event */}
+          <CreatePostOrEventModal
+            isVisible={isCreateEventModalVisible}
+            onClose={() => setIsCreateEventModalVisible(false)}
+            clubId={clubId}
+            type="event"
+            onSuccess={refreshClubData} // Refresh club data on success
+          />
+
           {/* Modal for Updating Club */}
           <Modal
             isVisible={isModalVisible}
@@ -208,8 +232,48 @@ const ClubDetail = () => {
                 description: club.description || "",
                 clubImage: null, // Handle the image in Dropzone
               }}
-              validationSchema={validationSchema}
-              onSubmit={handleUpdate}
+              validationSchema={Yup.object().shape({
+                name: Yup.string()
+                  .required("Club name is required")
+                  .min(3, "Name must be at least 3 characters"),
+                description: Yup.string()
+                  .required("Description is required")
+                  .min(10, "Description must be at least 10 characters"),
+              })}
+              onSubmit={async (values, { setSubmitting, resetForm }) => {
+                setLoadingUpdate(true);
+                try {
+                  const formData = new FormData();
+                  formData.append("name", values.name);
+                  formData.append("description", values.description);
+                  formData.append("clubImage", values.clubImage);
+
+                  const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}update-club/${clubId}`,
+                    {
+                      method: "POST",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: formData,
+                    }
+                  );
+
+                  if (!response.ok) {
+                    throw new Error("Failed to update the club");
+                  }
+
+                  await response.json();
+                  setIsModalVisible(false);
+                  fetchClub();
+                  resetForm();
+                } catch (err) {
+                  setError(err.message);
+                } finally {
+                  setLoadingUpdate(false);
+                  setSubmitting(false);
+                }
+              }}
             >
               {({ setFieldValue, isSubmitting, values }) => (
                 <Form>
@@ -251,7 +315,6 @@ const ClubDetail = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
-                  {/* Current Club Image Preview */}
                   {club.clubImage && (
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700">
@@ -280,7 +343,6 @@ const ClubDetail = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
-                  {/* Show general error inside the form */}
                   {error && (
                     <div className="text-red-500 text-sm mb-4">{error}</div>
                   )}

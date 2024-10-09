@@ -4,6 +4,8 @@ import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 import WarningModal from "./WarningModal";
 import { BsDot } from "react-icons/bs";
+import PeopleListModal from "./PeopleListModal";
+
 const PostCard = ({ clubId, token }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,10 @@ const PostCard = ({ clubId, token }) => {
   const [expandedPost, setExpandedPost] = useState(null);
   const [postToDelete, setPostToDelete] = useState(null);
   const [isWarningVisible, setIsWarningVisible] = useState(false);
+  const [isPeopleModalOpen, setIsPeopleModalOpen] = useState(false);
+  const [peopleList, setPeopleList] = useState([]);
+  const [peopleTitle, setPeopleTitle] = useState("");
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const nextAppElement = document.querySelector("#__next");
@@ -124,6 +130,17 @@ const PostCard = ({ clubId, token }) => {
   const closeModal = () => {
     setSelectedMedia([]);
     setIsModalOpen(false);
+  };
+
+  const openPeopleModal = (list, title) => {
+    setPeopleList(list);
+    setPeopleTitle(title);
+    setIsPeopleModalOpen(true);
+  };
+
+  const closePeopleModal = () => {
+    setIsPeopleModalOpen(false);
+    setPeopleList([]);
   };
 
   const renderImageGrid = (media) => {
@@ -302,12 +319,12 @@ const PostCard = ({ clubId, token }) => {
 
   return (
     <div className="mt-10">
-      <h2 className="text-3xl font-semibold text-gray-800">
+      {/* <h2 className="text-3xl font-semibold text-gray-800">
         Posts ({postCount})
       </h2>
       {eventCount > 0 && (
         <h3 className="text-lg text-gray-600 mt-2">Events ({eventCount})</h3>
-      )}
+      )} */}
 
       <div className="mt-6 space-y-6">
         {posts.map((post) => (
@@ -390,10 +407,23 @@ const PostCard = ({ clubId, token }) => {
 
               {post.isEvent && (
                 <div>
-                  <span className="text-gray-600">
+                  <span
+                    className="text-gray-600 cursor-pointer"
+                    onClick={() =>
+                      openPeopleModal(
+                        post.eventDetails.interested,
+                        "Interested Users"
+                      )
+                    }
+                  >
                     👍 {post.eventDetails.interested.length} Interested
                   </span>
-                  <span className="ml-4 text-gray-600">
+                  <span
+                    className="ml-4 text-gray-600 cursor-pointer"
+                    onClick={() =>
+                      openPeopleModal(post.eventDetails.going, "Going Users")
+                    }
+                  >
                     🎉 {post.eventDetails.going.length} Going
                   </span>
                 </div>
@@ -413,6 +443,13 @@ const PostCard = ({ clubId, token }) => {
         onClose={closeWarningModal}
         onConfirm={confirmDelete}
       />
+      <PeopleListModal
+        isVisible={isPeopleModalOpen}
+        onClose={closePeopleModal}
+        title={peopleTitle}
+        peopleList={peopleList}
+      />
+
       {/* Modal for Viewing Full-Size Media */}
       {selectedMedia.length > 0 && (
         <Modal

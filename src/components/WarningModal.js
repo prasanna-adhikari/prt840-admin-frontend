@@ -6,7 +6,7 @@ const WarningModal = ({ isVisible, onClose, onConfirm }) => {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-xl font-semibold mb-4">Are you sure?</h2>
         <p className="mb-6">
-          Do you really want to delete this club? This action cannot be undone.
+          Do you really want to delete it? This action cannot be undone.
         </p>
         <div className="flex justify-end space-x-4">
           <button
