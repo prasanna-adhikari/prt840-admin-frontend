@@ -11,25 +11,24 @@ import {
   FaClipboardList,
   FaRegNewspaper,
   FaUserEdit,
-  FaUsersCog, // For Quick Link icons
+  FaUsersCog,
   FaRegBuilding,
-} from "react-icons/fa"; // Icons
-import { useDropzone } from "react-dropzone"; // react-dropzone for image upload
-import { Pie } from "react-chartjs-2"; // For pie chart
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"; // Required for chart.js
+} from "react-icons/fa";
+import { useDropzone } from "react-dropzone";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
-// Register the necessary chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DashboardPage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState({});
-  const [showProfile, setShowProfile] = useState(false); // Toggle between dashboard and profile
+  const [showProfile, setShowProfile] = useState(false);
   const [profile, setProfile] = useState({ name: "", email: "" });
   const [profileImage, setProfileImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null); // For new image preview
-  const [currentProfileImage, setCurrentProfileImage] = useState(null); // For current profile image
+  const [imagePreview, setImagePreview] = useState(null);
+  const [currentProfileImage, setCurrentProfileImage] = useState(null);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -53,11 +52,9 @@ const DashboardPage = () => {
       }
 
       setUser(parsedUser);
-      setProfile({ name: parsedUser.name, email: parsedUser.email }); // Set initial profile data
-      fetchProfileImage(token); // Fetch the current profile image
+      setProfile({ name: parsedUser.name, email: parsedUser.email });
+      fetchProfileImage(token);
       setLoading(false);
-
-      // Fetch metrics
       fetchMetrics(token);
     } catch (err) {
       localStorage.removeItem("token");
@@ -108,19 +105,18 @@ const DashboardPage = () => {
       );
 
       const profileImageUrl = response.data.result.user.profileImage;
-      setCurrentProfileImage(profileImageUrl); // Set the current profile image URL
+      setCurrentProfileImage(profileImageUrl);
     } catch (error) {
       console.error("Error fetching profile image", error);
     }
   };
 
-  // Dropzone setup
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "image/*": [] },
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
       setProfileImage(file);
-      setImagePreview(URL.createObjectURL(file)); // Set the new image preview URL
+      setImagePreview(URL.createObjectURL(file));
     },
   });
 
@@ -160,14 +156,12 @@ const DashboardPage = () => {
 
       const newProfileImageUrl = response.data.result.user.profileImage;
 
-      // Update the user in localStorage
       const updatedUser = { ...user, profileImage: newProfileImageUrl };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
-      // Update the state
       setUser(updatedUser);
       setCurrentProfileImage(newProfileImageUrl);
-      setImagePreview(null); // Clear the preview
+      setImagePreview(null);
     } catch (error) {
       console.error("Error updating profile image", error);
     }
@@ -189,7 +183,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Data for Pie chart
   const pieChartData = {
     labels: ["Verified Users", "Unverified Users"],
     datasets: [
@@ -198,7 +191,7 @@ const DashboardPage = () => {
           metrics.totalUsers - metrics.totalUnverifiedUsers,
           metrics.totalUnverifiedUsers,
         ],
-        backgroundColor: ["#4caf50", "#f44336"], // Green for verified, red for unverified
+        backgroundColor: ["#4caf50", "#f44336"],
         hoverBackgroundColor: ["#66bb6a", "#ef5350"],
       },
     ],
@@ -232,13 +225,11 @@ const DashboardPage = () => {
           <div className="bg-white shadow-md p-8 rounded-lg">
             <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
 
-            {/* Update Profile Image */}
             <form onSubmit={handleProfileImageUpdate}>
               <div className="mb-4">
                 <label className="block text-gray-700">
                   Current Profile Image
                 </label>
-
                 {currentProfileImage && (
                   <div className="mt-2">
                     <img
@@ -250,11 +241,9 @@ const DashboardPage = () => {
                     />
                   </div>
                 )}
-
                 <label className="block text-gray-700 mt-4">
                   New Profile Image
                 </label>
-
                 <div
                   {...getRootProps({
                     className:
@@ -286,7 +275,6 @@ const DashboardPage = () => {
               </div>
             </form>
 
-            {/* Update Name and Email */}
             <div className="mb-4">
               <label className="block text-gray-700">Name</label>
               <input
@@ -316,7 +304,6 @@ const DashboardPage = () => {
               Save Changes
             </button>
 
-            {/* Change Password */}
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4">Change Password</h2>
               <div className="mb-4">
@@ -357,9 +344,7 @@ const DashboardPage = () => {
           </div>
         ) : (
           <>
-            {/* Dashboard Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-              {/* Total Users */}
               <div className="bg-white shadow-md p-6 rounded-lg flex items-center">
                 <FaUsers className="text-blue-500 text-3xl mr-4" />
                 <div>
@@ -370,7 +355,6 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              {/* Unverified Users */}
               <div className="bg-white shadow-md p-6 rounded-lg flex items-center">
                 <FaUserShield className="text-red-500 text-3xl mr-4" />
                 <div>
@@ -383,7 +367,6 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              {/* Total Clubs */}
               <div className="bg-white shadow-md p-6 rounded-lg flex items-center">
                 <FaClipboardList className="text-green-500 text-3xl mr-4" />
                 <div>
@@ -394,7 +377,6 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              {/* Total Posts */}
               <div className="bg-white shadow-md p-6 rounded-lg flex items-center">
                 <FaRegNewspaper className="text-purple-500 text-3xl mr-4" />
                 <div>
@@ -406,9 +388,7 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            {/* Quick Links */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-              {/* Quick Links */}
               <div className="bg-white p-6 shadow-md rounded-lg">
                 <h2 className="text-2xl font-semibold mb-4">Quick Links</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -429,7 +409,6 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              {/* Pie Chart for User Verification Status */}
               <div className="bg-white p-8 shadow-md rounded-lg">
                 <h2 className="text-2xl font-semibold mb-4">
                   User Verification Status

@@ -5,23 +5,23 @@ import { useRouter } from "next/navigation";
 import Sidenav from "../../components/Sidenav";
 import Loading from "../../components/Loading";
 import Modal from "../../components/Modal";
-import ClubImageUpload from "../../components/ClubImageUpload"; // Import the Dropzone component
-import Pagination from "../../components/Pagination"; // Import the reusable Pagination component
-import WarningModal from "../../components/WarningModal"; // Import the WarningModal component
+import ClubImageUpload from "../../components/ClubImageUpload";
+import Pagination from "../../components/Pagination";
+import WarningModal from "../../components/WarningModal";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup"; // For validation
+import * as Yup from "yup";
 
 const ClubsPage = () => {
   const [clubs, setClubs] = useState([]);
-  const [loadingClubs, setLoadingClubs] = useState(true); // Specific loading state for clubs
-  const [loadingSubmit, setLoadingSubmit] = useState(false); // Loading state for adding a club
-  const [loadingDelete, setLoadingDelete] = useState(false); // Loading state for deleting a club
-  const [error, setError] = useState(null); // Error state for displaying in modal
-  const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility for adding club
-  const [isWarningModalVisible, setIsWarningModalVisible] = useState(false); // Control warning modal visibility
-  const [clubToDelete, setClubToDelete] = useState(null); // Track the club to be deleted
-  const [searchQuery, setSearchQuery] = useState(""); // Search query state
-  const [page, setPage] = useState(0); // Page number for pagination (0-indexed for react-paginate)
+  const [loadingClubs, setLoadingClubs] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [error, setError] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isWarningModalVisible, setIsWarningModalVisible] = useState(false);
+  const [clubToDelete, setClubToDelete] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(0); // Page number for pagination
   const [totalClubs, setTotalClubs] = useState(0); // Total number of clubs
   const [limit] = useState(3); // Results per page
   const router = useRouter();
@@ -34,17 +34,15 @@ const ClubsPage = () => {
     } else {
       router.push("/login");
     }
-  }, [page, searchQuery]); // Re-fetch when page or search query changes
+  }, [page, searchQuery]);
 
-  // Fetch all clubs or clubs based on search query and pagination
   const fetchClubs = async () => {
-    setLoadingClubs(true); // Set loading only for clubs data
-    setError(null); // Reset error on each fetch attempt
+    setLoadingClubs(true);
+    setError(null);
     try {
       const queryParam = searchQuery
         ? `&query=${encodeURIComponent(searchQuery)}`
-        : ""; // Encode search query
-
+        : "";
       const endpoint = searchQuery
         ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/search-clubs?page=${
             page + 1
@@ -66,35 +64,31 @@ const ClubsPage = () => {
       }
 
       const data = await response.json();
-
-      // Set clubs data and total clubs from backend response
       setClubs(data.result);
-      setTotalClubs(data.totalClubs); // Assuming the backend provides `totalClubs`
+      setTotalClubs(data.totalClubs);
     } catch (err) {
       console.error(err);
-      setError("Failed to fetch clubs"); // Set error state
-      setClubs([]); // Ensure clubs is reset to an empty array
+      setError("Failed to fetch clubs");
+      setClubs([]);
     } finally {
-      setLoadingClubs(false); // Set loading to false after fetch
+      setLoadingClubs(false);
     }
   };
 
-  // Handle search on keyup with debounce
+  // Debounce search input
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      setPage(0); // Reset to the first page on search
+      setPage(0);
       fetchClubs();
-    }, 3000); // Delay in milliseconds
+    }, 3000);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
-  // Handle pagination page change
   const handlePageClick = (selectedPage) => {
     setPage(selectedPage.selected);
   };
 
-  // Validation schema for the form using Yup
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required("Club name is required")
@@ -105,32 +99,28 @@ const ClubsPage = () => {
     clubImage: Yup.mixed()
       .required("An image is required")
       .test("fileSize", "The file is too large", (value) => {
-        return value && value.size <= 1024 * 1024 * 5; // 5MB file size limit
+        return value && value.size <= 1024 * 1024 * 5; // 5MB limit
       }),
   });
 
-  // Handle form submission using FormData and catch errors
   const handleSubmit = async (
     values,
     { setSubmitting, setErrors, resetForm }
   ) => {
-    setLoadingSubmit(true); // Set loading state for submission
+    setLoadingSubmit(true);
     const formData = new FormData();
 
-    // Append form fields to FormData
     formData.append("name", values.name);
     formData.append("description", values.description);
-    formData.append("clubImage", values.clubImage); // Append the file
+    formData.append("clubImage", values.clubImage);
 
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/club`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData, // Send FormData with the file and other fields
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
         }
       );
 
@@ -140,36 +130,33 @@ const ClubsPage = () => {
           errorData.message &&
           errorData.message.includes("Club name already exists")
         ) {
-          setErrors({ name: errorData.message }); // Set specific error for the name field
+          setErrors({ name: errorData.message });
         } else {
           setError(errorData.message || "Failed to add the club");
         }
-        return; // Stop further execution after error is set
+        return;
       }
 
-      // Reset to the first page and fetch the updated list of clubs
       setPage(0);
-      fetchClubs(); // Fetch the updated list of clubs
-      setIsModalVisible(false); // Close the modal
-      resetForm(); // Reset the form after submission
+      fetchClubs();
+      setIsModalVisible(false);
+      resetForm();
     } catch (err) {
-      setError("An error occurred while creating the club."); // General error
+      setError("An error occurred while creating the club.");
       console.error(err.message);
     } finally {
-      setLoadingSubmit(false); // Set loading state to false
+      setLoadingSubmit(false);
       setSubmitting(false);
     }
   };
 
-  // Function to handle confirming the deletion of a club
   const handleConfirmDeleteClub = () => {
     if (clubToDelete) {
-      setLoadingDelete(true); // Set loading state for delete
+      setLoadingDelete(true);
       handleDeleteClub(clubToDelete);
     }
   };
 
-  // Function to delete a club
   const handleDeleteClub = async (clubId) => {
     try {
       const response = await fetch(
@@ -187,27 +174,21 @@ const ClubsPage = () => {
         throw new Error("Failed to delete club");
       }
 
-      // Update total clubs and fetch updated data
       const updatedTotalClubs = totalClubs - 1;
-
-      // Check if the current page is empty after deleting the item
       const isPageEmptyAfterDelete = clubs.length === 1 && page > 0;
 
-      // If the current page becomes empty, move to the previous page
       if (isPageEmptyAfterDelete) {
         setPage((prevPage) => prevPage - 1);
       } else {
-        // Refetch the data on the current page
         fetchClubs();
       }
 
-      // Update total clubs
       setTotalClubs(updatedTotalClubs);
     } catch (err) {
       console.error("Error deleting club:", err.message);
       setError("Failed to delete the club");
     } finally {
-      setLoadingDelete(false); // Set loading state to false after delete
+      setLoadingDelete(false);
       setIsWarningModalVisible(false);
       setClubToDelete(null);
     }
@@ -219,7 +200,6 @@ const ClubsPage = () => {
       <div className="flex-1 p-8 bg-gray-100 min-h-screen ml-64">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold text-gray-800">Clubs</h1>
-          {/* Add Club Button */}
           <button
             onClick={() => setIsModalVisible(true)}
             className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
@@ -228,7 +208,6 @@ const ClubsPage = () => {
           </button>
         </div>
 
-        {/* Search Input */}
         <input
           type="text"
           value={searchQuery}
@@ -237,12 +216,10 @@ const ClubsPage = () => {
           className="w-full p-2 border border-gray-300 rounded-md mb-6"
         />
 
-        {/* Clubs List and Loading Indicator */}
         {loadingClubs ? (
           <Loading />
         ) : (
           <>
-            {/* Show "No search results found" when search is active and results are empty */}
             {searchQuery && clubs.length === 0 ? (
               <div className="text-gray-600 text-center">
                 No search results found.
@@ -293,7 +270,6 @@ const ClubsPage = () => {
                   ))}
                 </div>
 
-                {/* Pagination Controls */}
                 <div className="flex justify-center mt-8">
                   <Pagination
                     pageCount={Math.ceil(totalClubs / limit)}
@@ -304,25 +280,19 @@ const ClubsPage = () => {
               </>
             )}
 
-            {/* Modal for Adding a New Club */}
             <Modal
               isVisible={isModalVisible}
               onClose={() => setIsModalVisible(false)}
               title={`Add New Club`}
             >
               <Formik
-                initialValues={{
-                  name: "",
-                  description: "",
-                  clubImage: null,
-                }}
+                initialValues={{ name: "", description: "", clubImage: null }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
                 {({ setFieldValue, isSubmitting, errors }) => (
                   <Form>
-                    {loadingSubmit && <Loading />}{" "}
-                    {/* Show loading during submission */}
+                    {loadingSubmit && <Loading />}
                     <div className="mb-4">
                       <label
                         htmlFor="name"
@@ -366,15 +336,13 @@ const ClubsPage = () => {
                       >
                         Club Image
                       </label>
-                      <ClubImageUpload setFieldValue={setFieldValue} />{" "}
-                      {/* Dropzone for file upload */}
+                      <ClubImageUpload setFieldValue={setFieldValue} />
                       <ErrorMessage
                         name="clubImage"
                         component="div"
                         className="text-red-500 text-sm mt-1"
                       />
                     </div>
-                    {/* Show general error inside the form, if any */}
                     {error && (
                       <div className="text-red-500 text-sm mb-4">{error}</div>
                     )}
@@ -390,13 +358,12 @@ const ClubsPage = () => {
               </Formik>
             </Modal>
 
-            {/* Warning Modal for Deleting Club */}
             <WarningModal
               isVisible={isWarningModalVisible}
               onClose={() => setIsWarningModalVisible(false)}
               onConfirm={handleConfirmDeleteClub}
             >
-              {loadingDelete && <Loading />} {/* Show loading during delete */}
+              {loadingDelete && <Loading />}
             </WarningModal>
           </>
         )}

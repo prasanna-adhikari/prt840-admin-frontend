@@ -13,9 +13,8 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
-    setIsLoading(true); // Start loading state
+    setIsLoading(true);
     try {
-      // Perform the login API request to /user/login
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}user/login`,
         {
@@ -33,22 +32,18 @@ const LoginPage = () => {
       }
 
       const data = await response.json();
-
-      // Check if the user has the appropriate role
       const { role } = data.result;
+
       if (role !== "admin" && role !== "superuser") {
         throw new Error(
           "Access denied. Only admins and superusers can log in."
         );
       }
 
-      // Store the token and navigate to the admin panel
-      localStorage.setItem("token", data.token); // Store token for later use
+      localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.result));
       setIsLoading(false);
-
-      // Example: Redirect to the admin dashboard
-      router.push("/dashboard"); // Uncomment if you have a router setup
+      router.push("/dashboard");
     } catch (err) {
       setIsLoading(false);
       setError(err.message || "An unexpected error occurred.");
@@ -64,6 +59,7 @@ const LoginPage = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
           Admin Login
         </h2>
+
         <div className="mb-4">
           <label className="block text-sm text-gray-600 mb-2" htmlFor="email">
             Email:
@@ -77,6 +73,7 @@ const LoginPage = () => {
             required
           />
         </div>
+
         <div className="mb-6">
           <label
             className="block text-sm text-gray-600 mb-2"
@@ -94,10 +91,8 @@ const LoginPage = () => {
           />
         </div>
 
-        {/* Display error message */}
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-        {/* Show loading spinner or text when loading */}
         {isLoading ? (
           <button
             type="button"

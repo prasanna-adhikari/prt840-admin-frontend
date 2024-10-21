@@ -8,7 +8,7 @@ const ClubImageUpload = ({ setFieldValue }) => {
 
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
-    setFieldValue("clubImage", file); // Set the file in Formik
+    setFieldValue("clubImage", file);
     setPreview(URL.createObjectURL(file)); // Create a preview of the image
   };
 

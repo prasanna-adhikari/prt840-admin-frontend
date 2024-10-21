@@ -1,9 +1,8 @@
 import React from "react";
 import Modal from "react-modal";
-import * as XLSX from "xlsx"; // Import the xlsx library
+import * as XLSX from "xlsx";
 
 const PeopleListModal = ({ isVisible, onClose, title, peopleList }) => {
-  // Function to export data to Excel
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
       peopleList.map((person) => ({

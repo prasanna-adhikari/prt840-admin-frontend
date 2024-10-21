@@ -1,35 +1,34 @@
-"use client"; // Ensure it's the first line in your component file
+"use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation"; // Correct import for App Router in Next.js 13+
+import { useRouter } from "next/navigation";
 import Sidenav from "@/components/Sidenav";
 import Loading from "@/components/Loading";
-import Pagination from "@/components/Pagination"; // Import the Pagination component
-import { BsThreeDotsVertical } from "react-icons/bs"; // Icon for the three dots
+import Pagination from "@/components/Pagination";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import axios from "axios";
 
 const UsersPage = () => {
-  const [users, setUsers] = useState([]); // User data
-  const [loading, setLoading] = useState(false); // For showing the loader while fetching data
-  const [error, setError] = useState(null); // Error state for displaying errors
-  const [searchQuery, setSearchQuery] = useState(""); // Search query state
-  const [page, setPage] = useState(0); // Page number for pagination (0-indexed for react-paginate)
-  const [totalPages, setTotalPages] = useState(0); // Total number of pages for pagination
-  const [totalUsers, setTotalUsers] = useState(0); // Total number of pages for pagination
-  const [limit] = useState(4); // Limit per page
-  const [menuVisible, setMenuVisible] = useState(null); // Track the visible dropdown for each user
-  const [loadingAction, setLoadingAction] = useState(null); // Track loading state for user actions
-  const menuRef = useRef(null); // Ref to track the dropdown menu for clicks outside
-  const router = useRouter(); // Correct usage of router in Next.js App Router
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [limit] = useState(4);
+  const [menuVisible, setMenuVisible] = useState(null);
+  const [loadingAction, setLoadingAction] = useState(null);
+  const menuRef = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
-    fetchUsers(); // Fetch users
+    fetchUsers();
   }, [page, searchQuery]);
 
-  // Fetch users or search results from the API
   const fetchUsers = async () => {
-    setLoading(true); // Show loader while fetching
-    setError(null); // Reset any previous error
+    setLoading(true);
+    setError(null);
     try {
       const queryParam = searchQuery
         ? `&query=${encodeURIComponent(searchQuery)}`
@@ -48,38 +47,34 @@ const UsersPage = () => {
         },
       });
 
-      setUsers(response.data.result); // Set user data
+      setUsers(response.data.result);
       setTotalUsers(response.data.total);
-      setTotalPages(response.data.totalPages); // Update total pages for pagination
+      setTotalPages(response.data.totalPages);
     } catch (err) {
       setError("Failed to fetch users");
-      setUsers([]); // Ensure users array is reset in case of error
+      setUsers([]);
     } finally {
-      setLoading(false); // Hide loader after fetch is complete
+      setLoading(false);
     }
   };
 
-  // Handle pagination page click
   const handlePageClick = (selectedPage) => {
-    setPage(selectedPage.selected); // Set the selected page for pagination
+    setPage(selectedPage.selected);
   };
 
-  // Handle search query input with debounce
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setPage(0); // Reset to first page on new search
+    setPage(0);
   };
 
-  // Toggle the menu visibility
   const toggleMenu = (userId) => {
     setMenuVisible(menuVisible === userId ? null : userId);
   };
 
-  // Close the menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuVisible(null); // Close menu if click is outside the menu
+        setMenuVisible(null);
       }
     };
 
@@ -89,9 +84,8 @@ const UsersPage = () => {
     };
   }, [menuRef]);
 
-  // Handle deleting a user
   const handleDeleteUser = async (userId) => {
-    setLoadingAction(userId); // Show loading for this specific user action
+    setLoadingAction(userId);
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${userId}`,
@@ -101,26 +95,23 @@ const UsersPage = () => {
           },
         }
       );
-      setUsers(users.filter((user) => user._id !== userId)); // Remove user from list
+      setUsers(users.filter((user) => user._id !== userId));
     } catch (err) {
       setError("Failed to delete user");
     } finally {
-      setLoadingAction(null); // Stop loading after action
+      setLoadingAction(null);
     }
   };
 
-  // Toggle verified status of a user
   const toggleVerifiedStatus = async (userId, currentStatus) => {
-    setLoadingAction(userId); // Show loading for this specific user action
+    setLoadingAction(userId);
     try {
-      // Optimistic UI update
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user._id === userId ? { ...user, verified: !currentStatus } : user
         )
       );
 
-      // Send request to backend
       await axios.put(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${userId}`,
         { isVerified: !currentStatus },
@@ -133,11 +124,10 @@ const UsersPage = () => {
     } catch (err) {
       setError("Failed to update verification status");
     } finally {
-      setLoadingAction(null); // Stop loading after action
+      setLoadingAction(null);
     }
   };
 
-  // Navigate to the profile view page
   const viewProfile = (userId) => {
     router.push(`/users/${userId}`);
   };
@@ -147,7 +137,7 @@ const UsersPage = () => {
       <Sidenav />
       <div className="flex-grow p-6 ml-64">
         <h1 className="text-2xl font-bold mb-6">Users</h1>
-        {/* Search Bar */}
+
         <input
           type="text"
           value={searchQuery}
@@ -155,9 +145,10 @@ const UsersPage = () => {
           placeholder="Search by name or email..."
           className="w-full p-2 border border-gray-300 rounded-md mb-6"
         />
+
         {loading && <Loading />}
         {error && <div className="text-red-500">{error}</div>}
-        {/* User list */}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {!loading &&
             users.map((user) => (
@@ -165,10 +156,8 @@ const UsersPage = () => {
                 key={user._id}
                 className="bg-white p-4 shadow rounded-lg flex flex-col items-center relative"
               >
-                {/* Loading indicator for action */}
                 {loadingAction === user._id && <Loading />}
 
-                {/* Three dots menu */}
                 <div className="absolute top-2 right-2">
                   <BsThreeDotsVertical
                     className="cursor-pointer"
@@ -197,7 +186,6 @@ const UsersPage = () => {
                   )}
                 </div>
 
-                {/* Profile image */}
                 <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
                   <img
                     src={
@@ -208,15 +196,13 @@ const UsersPage = () => {
                         : "/default-avatar.png"
                     }
                     alt={user.name}
-                    className="w-40 h-40 object-cover "
+                    className="w-40 h-40 object-cover"
                   />
                 </div>
 
-                {/* User Name */}
                 <h2 className="text-lg font-semibold">{user.name}</h2>
-                <p className="text-gray-600 flex items-center">{user.email}</p>
-                {/* Role and Badge */}
-                <p className="text-gray-600 flex items-center">
+                <p className="text-gray-600">{user.email}</p>
+                <p className="text-gray-600">
                   {user.role}
                   <span
                     onClick={() =>
@@ -232,7 +218,6 @@ const UsersPage = () => {
                   </span>
                 </p>
 
-                {/* View Profile Button */}
                 <button
                   className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-700"
                   onClick={() => viewProfile(user._id)}
@@ -243,7 +228,6 @@ const UsersPage = () => {
             ))}
         </div>
 
-        {/* Pagination Controls */}
         <div className="mt-8 flex justify-center">
           <Pagination
             pageCount={Math.ceil(totalUsers / limit)}

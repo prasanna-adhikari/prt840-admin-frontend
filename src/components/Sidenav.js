@@ -6,8 +6,8 @@ import { useState } from "react";
 
 const Sidenav = () => {
   const router = useRouter();
-  const pathname = usePathname(); // Get the current pathname
-  const [loading, setLoading] = useState(false); // Loading state for route changes
+  const pathname = usePathname();
+  const [loading, setLoading] = useState(false);
 
   const handleNavigation = (route) => {
     setLoading(true);
@@ -27,7 +27,6 @@ const Sidenav = () => {
       </div>
       <nav className="flex-grow mt-10">
         <ul>
-          {/* Dashboard Link */}
           <li
             onClick={() => handleNavigation("/dashboard")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
@@ -36,7 +35,6 @@ const Sidenav = () => {
           >
             Dashboard
           </li>
-          {/* Clubs Link */}
           <li
             onClick={() => handleNavigation("/clubs")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
@@ -45,7 +43,6 @@ const Sidenav = () => {
           >
             Clubs
           </li>
-          {/* Users Link */}
           <li
             onClick={() => handleNavigation("/users")}
             className={`p-4 cursor-pointer hover:bg-gray-700 ${
@@ -54,15 +51,6 @@ const Sidenav = () => {
           >
             Users
           </li>
-          {/* Settings Link */}
-          {/* <li
-            onClick={() => handleNavigation("/settings")}
-            className={`p-4 cursor-pointer hover:bg-gray-700 ${
-              pathname === "/settings" ? "bg-gray-700" : ""
-            }`}
-          >
-            Settings
-          </li> */}
         </ul>
       </nav>
       <div className="border-t border-gray-700 p-4">
@@ -73,7 +61,6 @@ const Sidenav = () => {
           Logout
         </button>
       </div>
-      {/* Loading Indicator */}
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="text-white text-xl font-semibold">Loading...</div>

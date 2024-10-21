@@ -13,14 +13,12 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 const UserProfilePage = ({ params }) => {
-  const [user, setUser] = useState(null); // State for user data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-
-  const { id: userId } = params; // Get userId from URL
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { id: userId } = params;
 
   useEffect(() => {
-    // Fetch the user profile data
     const fetchUserProfile = async () => {
       setLoading(true);
       setError(null);
@@ -33,18 +31,17 @@ const UserProfilePage = ({ params }) => {
             },
           }
         );
-        setUser(response.data.result); // Set the fetched user data
+        setUser(response.data.result);
       } catch (err) {
         setError("Failed to load user profile");
       } finally {
-        setLoading(false); // Stop loading once the data is fetched
+        setLoading(false);
       }
     };
 
     fetchUserProfile();
   }, [userId]);
 
-  // Loading state before rendering the page
   if (loading) return <Loading />;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
@@ -52,17 +49,14 @@ const UserProfilePage = ({ params }) => {
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <Sidenav />
       <div className="flex-grow p-8 md:ml-64">
-        {/* Page Title */}
         <h1 className="text-3xl font-bold mb-8 text-center md:text-left">
           {user?.name}'s Profile
         </h1>
 
-        {/* Main Container */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Section */}
           <div className="lg:col-span-1 bg-white p-8 shadow-lg rounded-lg">
             <div className="flex flex-col items-center mb-6">
-              {/* Profile Image */}
               {user?.profileImage ? (
                 <img
                   src={`http://localhost:7000/${user.profileImage
@@ -77,7 +71,6 @@ const UserProfilePage = ({ params }) => {
                 </div>
               )}
 
-              {/* User Basic Info */}
               <h2 className="text-2xl font-semibold mb-2">{user?.name}</h2>
               <p className="text-gray-600 mb-4">{user?.email}</p>
               <p className="flex items-center">
@@ -86,7 +79,6 @@ const UserProfilePage = ({ params }) => {
               </p>
             </div>
 
-            {/* User Details */}
             <div className="space-y-4 text-center lg:text-left">
               <p>
                 <strong>Role:</strong> {user?.role || "N/A"}
@@ -100,7 +92,7 @@ const UserProfilePage = ({ params }) => {
 
           {/* Friends and Following Clubs Section */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Friends Section Carousel */}
+            {/* Friends Section */}
             <div className="bg-white p-8 shadow-lg rounded-lg">
               <div className="flex items-center mb-6">
                 <FaUserFriends className="text-2xl text-blue-500 mr-3" />
@@ -138,7 +130,7 @@ const UserProfilePage = ({ params }) => {
               )}
             </div>
 
-            {/* Following Clubs Section Carousel */}
+            {/* Following Clubs Section */}
             <div className="bg-white p-8 shadow-lg rounded-lg">
               <div className="flex items-center mb-6">
                 <FaUsers className="text-2xl text-green-500 mr-3" />

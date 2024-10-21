@@ -1,4 +1,3 @@
-// ImageGalleryModal.js
 import React from "react";
 import Modal from "./Modal";
 import ImageGallery from "react-image-gallery";

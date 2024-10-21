@@ -1,11 +1,9 @@
-// CreatePostOrEventModal.jsx
-
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import Modal from "./Modal"; // Assuming Modal component is available in the same directory
-import { FiUpload, FiPlus } from "react-icons/fi"; // Importing icons from react-icons
+import Modal from "./Modal";
+import { FiUpload, FiPlus } from "react-icons/fi";
 
 const CreatePostOrEventModal = ({
   isVisible,
@@ -14,10 +12,9 @@ const CreatePostOrEventModal = ({
   type,
   onSuccess,
 }) => {
-  // State for handling image previews
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Form validation schema for both posts and events
+  // Validation schema for both posts and events
   const validationSchema = Yup.object().shape({
     content: Yup.string()
       .required("Content is required")
@@ -37,7 +34,6 @@ const CreatePostOrEventModal = ({
       const formData = new FormData();
       formData.append("content", values.content);
 
-      // Append the media file to the formData
       if (values.media) {
         formData.append("media", values.media);
       }
@@ -48,7 +44,6 @@ const CreatePostOrEventModal = ({
         formData.append("location", values.location);
       }
 
-      // Set the appropriate endpoint for the request
       const url =
         type === "event"
           ? `${process.env.NEXT_PUBLIC_API_BASE_URL}clubs/${clubId}/event`
@@ -62,23 +57,20 @@ const CreatePostOrEventModal = ({
         body: formData,
       });
 
-      // Handle unsuccessful response
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to create the post/event");
       }
 
-      // Successfully created post/event
       await response.json();
       resetForm();
       setStatus({ success: true });
-      onClose(); // Close the modal after successful submission
-      setPreviewImage(null); // Clear image preview
+      onClose();
+      setPreviewImage(null);
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      console.error("Error creating post/event:", error);
       setStatus({ success: false, errorMessage: error.message });
     } finally {
       setSubmitting(false);
@@ -88,8 +80,8 @@ const CreatePostOrEventModal = ({
   const onDrop = (acceptedFiles, setFieldValue) => {
     const file = acceptedFiles[0];
     if (file) {
-      setFieldValue("media", file); // Set the file in Formik
-      setPreviewImage(URL.createObjectURL(file)); // Create a preview of the image
+      setFieldValue("media", file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -107,7 +99,7 @@ const CreatePostOrEventModal = ({
             eventDate: "",
             location: "",
           }),
-          media: null, // Single file upload
+          media: null,
         }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
@@ -117,7 +109,7 @@ const CreatePostOrEventModal = ({
             onDrop: (acceptedFiles) => onDrop(acceptedFiles, setFieldValue),
             accept: "image/jpeg, image/png, image/gif, image/webp",
             maxFiles: 1,
-            maxSize: 1024 * 1024 * 5, // 5MB limit
+            maxSize: 1024 * 1024 * 5,
           });
 
           return (
@@ -239,7 +231,6 @@ const CreatePostOrEventModal = ({
                 )}
               </div>
 
-              {/* Error status for API request */}
               {status && status.errorMessage && (
                 <div className="text-red-500 text-sm mb-4">
                   {status.errorMessage}

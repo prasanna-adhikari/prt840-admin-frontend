@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Modal from "../../../components/Modal";
-import Loading from "../../../components/Loading"; // Add loading spinner
-import Sidenav from "../../../components/Sidenav"; // Add sidenav
-import CreatePostOrEventModal from "../../../components/CreatePostOrEventModal"; // Import the new component
+import Loading from "../../../components/Loading";
+import Sidenav from "../../../components/Sidenav";
+import CreatePostOrEventModal from "../../../components/CreatePostOrEventModal";
 import PostCard from "@/components/PostCard";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -15,31 +15,30 @@ import { FiPlus } from "react-icons/fi";
 const ClubDetail = () => {
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [loadingUpdate, setLoadingUpdate] = useState(false); // Loading state for updating club
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [error, setError] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility for update
-  const [showAllFollowers, setShowAllFollowers] = useState(false); // Control visibility of followers
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showAllFollowers, setShowAllFollowers] = useState(false);
   const [isCreatePostModalVisible, setIsCreatePostModalVisible] =
-    useState(false); // Control modal visibility for creating posts
+    useState(false);
   const [isCreateEventModalVisible, setIsCreateEventModalVisible] =
-    useState(false); // Control modal visibility for creating events
-  const { id: clubId } = useParams(); // Destructure 'id' from useParams()
-  const [token, setToken] = useState(null); // State to hold the token
+    useState(false);
+  const { id: clubId } = useParams();
+  const [token, setToken] = useState(null);
 
-  // Fetch the token from localStorage after the component has mounted
+  // Fetch token from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Check if we are in the browser environment
       const storedToken = localStorage.getItem("token");
       setToken(storedToken);
     }
   }, []);
 
-  // Reusable function to fetch club details
+  // Fetch club details from the API
   const fetchClub = async () => {
     if (!token) return;
 
-    setLoading(true); // Set loading state when fetching club
+    setLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}clubs/${clubId}`,
@@ -58,32 +57,29 @@ const ClubDetail = () => {
 
       const data = await response.json();
       setClub(data.result);
-      setLoading(false);
     } catch (err) {
       console.error(err);
       setError(err.message);
+    } finally {
       setLoading(false);
     }
   };
 
+  // Fetch club details when clubId or token changes
   useEffect(() => {
     if (clubId && token) {
       fetchClub();
     }
   }, [clubId, token]);
 
-  // Callback function to refresh club data after a new post or event is created
+  // Refresh club data after creating a new post or event
   const refreshClubData = () => {
     fetchClub();
   };
 
-  if (loading) {
-    return <Loading />; // Use the Loading component when fetching data
-  }
+  if (loading) return <Loading />;
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
+  if (error) return <p className="text-red-500">{error}</p>;
 
   const followersToShow = showAllFollowers
     ? club?.followers
@@ -91,10 +87,10 @@ const ClubDetail = () => {
 
   return (
     <div className="flex">
-      <Sidenav /> {/* Include Sidenav */}
+      <Sidenav />
       <div className="flex-1 p-8 bg-gray-100 min-h-screen ml-64">
         <div className="max-w-4xl mx-auto">
-          {/* Club Header Section */}
+          {/* Club Header */}
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-5xl font-bold text-gray-800">{club.name}</h1>
             <button
@@ -104,7 +100,10 @@ const ClubDetail = () => {
               Update Club
             </button>
           </div>
+
           <p className="text-lg mt-4 text-gray-700">{club.description}</p>
+
+          {/* Club Image */}
           {club.clubImage && (
             <div className="mt-6">
               <img
@@ -155,7 +154,8 @@ const ClubDetail = () => {
                 </div>
               ))}
             </div>
-            {/* Show more or less followers button */}
+
+            {/* Show more/less followers */}
             {club?.followers?.length > 3 && (
               <div className="flex justify-center mt-4">
                 <button
@@ -167,10 +167,14 @@ const ClubDetail = () => {
               </div>
             )}
           </div>
+
+          {/* Posts & Events Section */}
           <h2 className="text-3xl font-semibold text-gray-800 mt-10">
             Posts & Events
           </h2>
+
           <div className="flex space-x-4 mt-5">
+            {/* Create Post Button */}
             <button
               className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100 transition duration-300"
               onClick={() => setIsCreatePostModalVisible(true)}
@@ -184,6 +188,8 @@ const ClubDetail = () => {
                 </p>
               </div>
             </button>
+
+            {/* Create Event Button */}
             <button
               className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100 transition duration-300"
               onClick={() => setIsCreateEventModalVisible(true)}
@@ -199,28 +205,24 @@ const ClubDetail = () => {
             </button>
           </div>
 
-          {/* Posts Section */}
           <PostCard clubId={club._id} token={token} />
 
-          {/* Modal for Creating Post */}
           <CreatePostOrEventModal
             isVisible={isCreatePostModalVisible}
             onClose={() => setIsCreatePostModalVisible(false)}
             clubId={clubId}
             type="post"
-            onSuccess={refreshClubData} // Refresh club data on success
+            onSuccess={refreshClubData}
           />
 
-          {/* Modal for Creating Event */}
           <CreatePostOrEventModal
             isVisible={isCreateEventModalVisible}
             onClose={() => setIsCreateEventModalVisible(false)}
             clubId={clubId}
             type="event"
-            onSuccess={refreshClubData} // Refresh club data on success
+            onSuccess={refreshClubData}
           />
 
-          {/* Modal for Updating Club */}
           <Modal
             isVisible={isModalVisible}
             onClose={() => setIsModalVisible(false)}
@@ -230,7 +232,7 @@ const ClubDetail = () => {
               initialValues={{
                 name: club.name || "",
                 description: club.description || "",
-                clubImage: null, // Handle the image in Dropzone
+                clubImage: null,
               }}
               validationSchema={Yup.object().shape({
                 name: Yup.string()
@@ -275,10 +277,9 @@ const ClubDetail = () => {
                 }
               }}
             >
-              {({ setFieldValue, isSubmitting, values }) => (
+              {({ setFieldValue, isSubmitting }) => (
                 <Form>
-                  {loadingUpdate && <Loading />}{" "}
-                  {/* Show loading during update */}
+                  {loadingUpdate && <Loading />}
                   <div className="mb-4">
                     <label
                       htmlFor="name"
@@ -315,6 +316,7 @@ const ClubDetail = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
+
                   {club.clubImage && (
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700">
@@ -329,6 +331,7 @@ const ClubDetail = () => {
                       />
                     </div>
                   )}
+
                   <div className="mb-4">
                     <label
                       htmlFor="clubImage"
@@ -343,9 +346,11 @@ const ClubDetail = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
+
                   {error && (
                     <div className="text-red-500 text-sm mb-4">{error}</div>
                   )}
+
                   <button
                     type="submit"
                     disabled={isSubmitting}

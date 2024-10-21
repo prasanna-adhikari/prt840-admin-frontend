@@ -15,10 +15,7 @@ const LoginPage = () => {
     try {
       const data = await apiRequest("admin/login", "POST", { email, password });
 
-      // Store token and navigate to dashboard
       localStorage.setItem("token", data.token);
-      // Here you would navigate to the dashboard page
-      // e.g., router.push('/dashboard')
     } catch (err) {
       setError(err.message);
     }
